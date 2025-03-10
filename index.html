@@ -415,6 +415,8 @@
 		 // playPauseButton.innerText = "Pause";
         initWeatherMap(initWeatherLayer);
 
+   
+
       map.addSource('contours', {
             type: 'vector',
             url:
@@ -539,10 +541,10 @@
   
             map.addLayer(weatherLayer, 'Water');
 
+
 			// Aqui anado el viento en todas las capas
 			
-        windLayer.animateByFactor(1600);
-        map.addLayer(windLayer);
+     
 
           }
           changeLayerLabel(activeLayer);
@@ -648,6 +650,10 @@
         // Event called when all the datasource for the next days are added and ready.
         // From now on, the layer nows the start and end dates.
         weatherLayer.on("sourceReady", event => {
+
+          windLayer.animateByFactor(1600);
+          map.addLayer(windLayer);
+          
           const startDate = weatherLayer.getAnimationStartDate();
           const endDate = weatherLayer.getAnimationEndDate();
           if (timeSlider.min > 0){
@@ -819,9 +825,6 @@ minLabel.style.fontWeight = "bold";
     this._container.appendChild(wrapper);
     return this._container;
 }
-
-
-
 
 
         onRemove() {
