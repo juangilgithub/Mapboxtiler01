@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maptiler weather layers</title>
+  <!-- <link href="/styles/base.css?t=1739795043" rel="stylesheet"> -->
+  <!-- <script src="/js/bootstrap.bundle.min.js?t=1739795043"></script> -->
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.5.1/maptiler-sdk.umd.min.js"></script>
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.5.1/maptiler-sdk.css" rel="stylesheet" />
+  <script src="https://cdn.maptiler.com/maptiler-weather/v2.2.0/maptiler-weather.umd.min.js"></script>
+	
+
+  <!-- <script src="./maptiler-weather-plus.umd.js"></script> -->
+  <style>
+    body { margin: 0; padding: 0; font-family: sans-serif; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #pointer-data{ z-index: 1; position: fixed; font-size: 20px; font-weight: 900; margin: 0px 0px 0px 0px; color: #fff; text-shadow: 0px 0px 10px #0007;}
+    /* #variable-name{ z-index: 1; position: fixed; font-size: 20px; font-weight: 500; margin: 5px 0px 0px 10px; color: #fff; text-shadow: 0px 0px 10px #0007; text-transform:capitalize;} */
+
+    #time-info {
+    position: fixed; /* Fija el elemento en la pantalla */
+    bottom: 20px; /* Distancia desde la parte inferior */
+    left: 50%; /* Centra horizontalmente */
+    transform: translateX(-50%); /* Ajusta el centrado */
+    z-index: 1;
+    text-shadow: 0px 0px 5px black;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center; /* Alinea el texto al centro */
+    margin: 0; /* Elimina el margen automático */
+    padding: 10px; /* Espaciado interno */
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo negro semi-transparente */
+    border-radius: 5px; /* Bordes redondeados */
+    display: flex;
+    flex-direction: column; /* Apila los elementos verticalmente */
+    align-items: center; /* Centra los elementos horizontalmente */
+    gap: 5px; /* Espacio entre el botón y el slider */
+}
+
+#play-container {
+            position: absolute;
+            top: calc(40px + 5 * 40px + 50px);
+            right: 10px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+#time-text {
+    font-size: 16px;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo negro semi-transparente */
+    color: white !important;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.7);
+    display: inline-block; /* Para que no ocupe toda la línea */
+}
+
+#time-slider {
+    width: 200px; /* Ancho del control deslizante */
+    filter: drop-shadow(0 0 7px rgba(0, 0, 0, 0.7));
+}
+
+    #pointer-data {
+    z-index: 1;
+    position: fixed;
+    font-size: 16px;
+    font-weight: 900;
+  
+    text-shadow: 0px 0px 10px #0007;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo negro traslúcido */
+    color: white !important; /* Asegura que el texto sea blanco */
+    padding: 5px 10px; /* Añade un poco de espacio alrededor del texto */
+    border-radius: 5px; /* Opcional: Redondea las esquinas */
+    text-shadow: 0px 0px 10px #0007; /* Mantén el texto con sombra para resaltar */
+}
+
+
+#variable-name {
+    z-index: 1;
+    position: fixed; /* Fija el elemento en la pantalla */
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo negro con transparencia */
+    padding: 5px 10px; /* Espaciado interno */
+    border-radius: 5px; /* Bordes redondeados */
+    top: 10px; /* Distancia desde la parte superior */
+    left: 50%; /* Centra el elemento horizontalmente */
+    transform: translateX(-50%); /* Ajusta la posición para que esté completamente centrado */
+    text-transform: capitalize; /* Capitalización del texto */
+}
+
+
+#pointer-data {
+    top: 40px; /* Ajusta la posición vertical según lo necesites */
+    font-weight: 900;
+}
+
+#variable-name {
+    top: 10px; /* Ajusta la posición vertical según lo necesites */
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+
+
+
+    #buttons {
+   position: fixed;
+   top: 40px;
+   right: 10px;  /* Lo pegamos a la derecha */
+   left: auto;   /* Quitamos el centrado */
+   transform: none; /* Eliminamos la transformación previa */
+   z-index: 100;
+   background: transparent;
+   padding: 10px;
+   border-radius: 10px;
+   display: flex;
+   flex-direction: column; /* Para apilarlos en vertical */
+   gap: 10px;
+ }
+
+#buttons {
+  list-style: none; /* Elimina los puntos de la lista */
+  padding: 0; /* Elimina el padding por defecto */
+}
+
+#buttons li {
+  list-style: none; /* Asegura que cada botón no tenga viñeta */
+}
+
+
+.button {
+    color: white; /* Texto blanco */
+    background: rgba(0, 0, 0, 0.7); /* Fondo negro con 70% de opacidad */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde semi-transparente */
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background 0.3s ease; /* Transición suave al cambiar el fondo */
+}
+
+.button:hover {
+    background: rgba(0, 0, 0, 0.9); /* Fondo negro más opaco al pasar el mouse */
+}
+
+.button.active {
+    background: rgba(0, 0, 0, 0.9); /* Fondo negro más opaco para el botón activo */
+    border: 1px solid rgba(255, 255, 255, 0.7); /* Borde más visible para el botón activo */
+}
+
+÷
+
+    .maplibregl-ctrl-color-ramp {
+    background: rgba(0, 0, 0, 0.7); /* Fondo oscuro semi-transparente */
+    color: white; /* Texto blanco */
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+    .color-ramp-label {
+      font-size: 16px;
+    }
+
+
+    .marker {
+        position: absolute;
+        pointer-events: none;
+      }
+
+      .markerMainWeatherIcon {
+        width: 100%;
+        height: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+      }
+
+      .markerTemperature {
+        width: 100%;
+        height: auto;
+        position: absolute;
+        bottom: 0px;
+        left: 0;
+        right: 0;
+        margin: auto;
+        text-align: center;
+        font-size: 15px;
+        color: white;
+        text-shadow: 0px 0px 4px black;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .fade-in-animation {
+        animation: fadeIn 0.5s ease forwards;
+      }
+
+
+  </style>
+</head>
+<body>
+  <div id="time-info">
+    <span id="time-text"></span>
+  
+    <!-- <button id="play-pause-bt" class="button">Play</button> -->
+    <input type="range" id="time-slider" min="0" max="11" step="1">
+     
+  </div>
+
+
+  <div id="variable-name">Detailed forecast
+
+  </div>
+  <div id="pointer-data">
+
+  </div>
+  <div id="map">
+ 
+
+
+  </div>
+  <ul id="buttons">
+	<li id="precipitation" class="btn btn-primary button">Precipitation</li>
+    <li id="radar" class="btn btn-primary button">Radar</li>
+    <li id="pressure" class="btn btn-primary button">Pressure</li>
+    <li id="temperature" class="btn btn-primary button">Temperature</li>
+    <li id="wind" class="btn btn-primary button">Wind</li>
+   </ul>
+
+   <div id="play-container">
+    <button id="play-pause-bt" class="button">Play</button>
+</div>
+
+
+
+  <script>
+      maptilersdk.config.apiKey = 'BMRZ94nyuUi40edFPorX';
+
+      const weatherLayers = {
+		   
+        "precipitation": {
+          "layer": null,
+          "value": "value",
+          "units": "l/h"
+        }, 
+		  
+        "radar": {
+          "layer": null,
+          "value": "value",
+          "units": "dBZ"
+        },
+        "pressure": {
+          "layer": null,
+          "value": "value",
+          "units": " hPa"
+        },
+        "clouds": {
+          "layer": null,
+          "value": "value",
+          "units": " %"
+        },
+        "temperature": {
+          "layer": null,
+          "value": "value",
+          "units": "°"
+        },
+        "wind": {
+          "layer": null,
+          "value": "speedMetersPerSecond",
+          "units": " m/s"
+        }
+      };
+
+
+      const appContainer = document.getElementById('map');
+
+
+      // https://api.maptiler.com/tiles/27bf4c07-f0ec-43c1-862a-441953a93cd1/?key=BMRZ94nyuUi40edFPorX#1.8/-1.45152/-16.83970
+
+      const map = (window.map = new maptilersdk.Map({
+        container: 'map', // container's id or the HTML element to render the map
+        style: maptilersdk.MapStyle.DATAVIZ.DARK,  // stylesheet location
+        zoom: 4, // Ajusta el zoom
+        center: [-3.7038, 40.4168],
+        hash: true,
+        navigationControl: false,
+        geolocateControl: false,
+        geolocate: true,
+      }));
+
+  
+
+      // Creating the div that will contain all the markers
+      const markerContainer = document.createElement("div");
+      appContainer.appendChild(markerContainer);
+    
+
+      const initWeatherLayer = "precipitation";
+
+      // const initialDate = new Date(Date.UTC(2025, 2, 5, 12, 0, 0)); // Marzo es el mes 2 porque los meses van de 0 a 11
+      // const initialTimestamp = initialDate.getTime() / 1000; 
+
+
+      const timeInfoContainer = document.getElementById("time-info");
+      const timeTextDiv = document.getElementById("time-text");
+      const timeSlider = document.getElementById("time-slider");
+      const playPauseButton = document.getElementById("play-pause-bt");
+     
+      const pointerDataDiv = document.getElementById("pointer-data");
+      let pointerLngLat = null;
+      let activeLayer = null;
+      let isPlaying = false;
+      let currentTime = null;
+      // let windLayer = null;
+	  
+	  
+	  
+
+      const customColoramp = new maptilerweather.ColorRamp({
+        stops: [
+          { value: -65, color: [49, 54, 149, 255] },
+          { value: -40, color: [69, 117, 180, 255] },
+          { value: -30, color: [116, 173, 209, 255] },
+          { value: -20, color: [171, 217, 233, 255] },
+          { value: -10, color: [224, 243, 248, 255] },
+          { value: 0, color: [255, 255, 255, 255] },
+          { value: 12, color: [255, 255, 191, 255] },
+          { value: 20, color: [254, 224, 144, 255] },
+          { value: 25, color: [253, 174, 97, 255] },
+          { value: 30, color: [244, 109, 67, 255] },
+          { value: 40, color: [215,48,39, 255] },
+          { value: 55, color: [165, 0, 38, 255] },
+        ],
+      });
+
+      timeSlider.addEventListener("input", (evt) => {
+        const weatherLayer = weatherLayers[activeLayer]?.layer;
+
+
+
+        const timeslider =   timeSlider.value / 1000
+
+        if (weatherLayer) {
+          weatherLayer.setAnimationTime(parseInt(timeSlider.value / 1000));
+          windLayer.setAnimationTime(parseInt(timeSlider.value / 1000));
+
+        }
+
+      });
+
+       function togglePlayPauseIcon() {
+            const playIcon = document.getElementById("play-icon");
+            const pauseIcon = document.getElementById("pause-icon");
+
+            if (isPlaying) {
+                playIcon.style.display = "none";  // Oculta el icono de Play
+                pauseIcon.style.display = "inline"; // Muestra el icono de Pause
+            } else {
+                playIcon.style.display = "inline"; // Muestra el icono de Play
+                pauseIcon.style.display = "none"; // Oculta el icono de Pause
+            }
+        }
+
+
+      function pauseAnimation(weatherLayer) {
+        weatherLayer.animateByFactor(0);
+        windLayer.animateByFactor(0);
+      //  playPauseButton.innerText = "Play 3600x";
+        isPlaying = false;
+      }
+
+      function playAnimation(weatherLayer) {
+        weatherLayer.animateByFactor(1600);
+        windLayer.animateByFactor(1600);
+      //  playPauseButton.innerText = "Pause";
+        isPlaying = true;
+      }
+	  
+	    // const windLayer = new maptilerweather.WindLayer();
+	  
+	  	  const windLayer = new maptilerweather.WindLayer({
+        colorramp: maptilerweather.ColorRamp.builtin.NULL,
+        color: [255, 255, 255, 0],
+        fastColor: [255, 255, 255, 100],
+        });
+		
+  
+
+      map.on('load', function () {
+        map.setPaintProperty("Water", 'fill-color', "rgba(0, 0, 0, 0.4)");
+		 // playPauseButton.innerText = "Pause";
+        initWeatherMap(initWeatherLayer);
+
+      map.addSource('contours', {
+            type: 'vector',
+            url:
+            'https://api.maptiler.com/tiles/contours-v2/tiles.json?key=BMRZ94nyuUi40edFPorX'
+        });
+        map.addLayer({
+            'id': 'terrain-data',
+            'type': 'line',
+            'source': 'contours',
+            'source-layer': 'contour',
+            'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': '#ff69b4',
+                'line-width': 1
+            }
+        });
+	
+
+      });
+
+      map.on('mouseout', function(evt) {
+        if (!evt.originalEvent.relatedTarget) {
+          pointerDataDiv.innerText = "";
+          pointerLngLat = null;
+        }
+      });
+
+      playPauseButton.addEventListener("click", () => {
+        const weatherLayer = weatherLayers[activeLayer]?.layer;
+        if (isPlaying) {
+          weatherLayer.animateByFactor(0);
+          windLayer.animateByFactor(0);
+          playPauseButton.innerText = "Play";
+         // labelsButton.disabled = false;
+        } else {
+          weatherLayer.animateByFactor(1600);
+          windLayer.animateByFactor(1600);
+          playPauseButton.innerText = "Pause";
+         // hideLabels();
+         // labelsButton.disabled = true;
+        }
+        isPlaying = !isPlaying;
+      });
+
+      function dBZtoRainRate(dBZ) {
+    let Z = Math.pow(10, dBZ / 10);  // Convertimos dBZ a Z
+    let R = Math.pow(Z / 200, 1 / 1.6);  // Aplicamos la ecuación Z-R para lluvia general
+    return R.toFixed(2); // Redondeamos a 2 decimales
+      }
+      function updatePointerValue(lngLat) {
+    if (!lngLat) return;
+    pointerLngLat = lngLat;
+    const weatherLayer = weatherLayers[activeLayer]?.layer;
+
+    const weatherLayerValue = weatherLayers[activeLayer]?.value;
+    const weatherLayerUnits = weatherLayers[activeLayer]?.units;
+
+    if (weatherLayer) {
+        const value = weatherLayer.pickAt(lngLat.lng, lngLat.lat);
+        if (!value) {
+            pointerDataDiv.innerText = "";
+            return;
+        }
+
+        let rawValue = value[weatherLayerValue];
+
+        // Solo dividir por 10 si la capa es Precipitation
+        if (activeLayer === "precipitation") {
+            rawValue *= 1;
+        }
+
+        // Si es precipitación, calcular tasa de lluvia
+        let displayValue = rawValue.toFixed(2);
+        if (activeLayer === "radar") {
+             // displayValue = dBZtoRainRate(rawValue); 
+			  displayValue = rawValue.toFixed(2); // Convierte dBZ a tasa de lluvia
+        }
+
+        // Mostrar el valor con las unidades correctas
+        pointerDataDiv.innerText = `${displayValue} ${weatherLayerUnits}`;
+       
+        if (activeLayer === "wind") {
+          pointerDataDiv.innerHTML = `<div id="arrow" style="transform: rotate(${value.directionAngle}deg);">↑</div>
+          ${value.compassDirection} ${value.speedKilometersPerHour.toFixed(1)} km/h`;
+        }
+
+
+    }
+}
+
+
+      map.on('mousemove', (e) => {
+        updatePointerValue(e.lngLat);
+      });
+
+      document.getElementById('buttons').addEventListener('click', function (event) {
+        // Change layer based on button id
+        changeWeatherLayer(event.target.id);
+
+      });
+
+      function changeWeatherLayer(type) {
+        
+        if (type !== activeLayer) {
+          if (map.getLayer(activeLayer)) {
+            const activeWeatherLayer = weatherLayers[activeLayer]?.layer;
+            if (activeWeatherLayer) {
+              currentTime = activeWeatherLayer.getAnimationTime();
+              map.setLayoutProperty(activeLayer, 'visibility', 'none');
+            }
+          }
+          activeLayer = type;
+          const weatherLayer = weatherLayers[activeLayer].layer || createWeatherLayer(activeLayer);
+      
+          if (map.getLayer(activeLayer)) {
+            map.setLayoutProperty(activeLayer, 'visibility', 'visible');
+
+          } else {
+  
+            map.addLayer(weatherLayer, 'Water');
+
+			// Aqui anado el viento en todas las capas
+			
+        windLayer.animateByFactor(1600);
+        map.addLayer(windLayer);
+
+          }
+          changeLayerLabel(activeLayer);
+          activateButton(activeLayer);
+          changeLayerAnimation(weatherLayer);
+
+          pointerDataDiv.innerText = "";
+          pointerLngLat = null;
+
+
+        
+
+          return weatherLayer;
+        }
+      }
+
+      function activateButton(activeLayer) {
+        const buttons = document.getElementsByClassName('button');
+        for (let i = 0; i < buttons.length; i++) {
+          const btn = buttons[i];
+          if (btn.id === activeLayer) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        }
+      }
+
+      function changeLayerAnimation(weatherLayer) {
+
+
+        weatherLayer.setAnimationTime(parseInt(timeSlider.value / 1000));
+
+        if (isPlaying) {
+          playAnimation(weatherLayer);
+        } else {
+          pauseAnimation(weatherLayer);
+        }
+      }
+
+      function createWeatherLayer(type){
+        let weatherLayer = null;
+        switch (type) {
+			
+			case 'precipitation':
+            weatherLayer = new maptilerweather.PrecipitationLayer({
+              
+                id: 'precipitation'
+            });
+            
+            break;
+
+          case 'radar':
+            weatherLayer = new maptilerweather.RadarLayer({
+                id: 'radar'
+            });
+            
+            break;
+
+          case 'pressure':
+            weatherLayer = new maptilerweather.PressureLayer({
+              opacity: 0.8,
+              id: 'pressure'
+            });
+            break;
+
+          case 'clouds':
+            weatherLayer = new maptilerweather.RadarLayer({
+                opacity: 0.8,
+        colorramp: maptilerweather.ColorRamp.builtin.RADAR_CLOUD,
+              id: 'cloud'
+            });
+            break;
+
+
+          case 'temperature':
+            weatherLayer = new maptilerweather.TemperatureLayer({
+              colorramp: maptilerweather.ColorRamp.builtin.TEMPERATURE_3,
+              id: 'temperature'
+            });
+            break;
+
+
+          case 'wind':
+            weatherLayer = new maptilerweather.WindLayer({
+                id: 'wind'});
+            break;
+
+
+        }
+
+        // Called when the animation is progressing
+        weatherLayer.on("tick", event => {
+          refreshTime();
+          updatePointerValue(pointerLngLat);
+        });
+
+        // Called when the time is manually set
+        weatherLayer.on("animationTimeSet", event => {
+          refreshTime();
+        });
+
+        // Event called when all the datasource for the next days are added and ready.
+        // From now on, the layer nows the start and end dates.
+        weatherLayer.on("sourceReady", event => {
+          const startDate = weatherLayer.getAnimationStartDate();
+          const endDate = weatherLayer.getAnimationEndDate();
+          if (timeSlider.min > 0){
+            weatherLayer.setAnimationTime(currentTime);
+            changeLayerAnimation(weatherLayer);
+          } else {
+            const currentDate = weatherLayer.getAnimationTimeDate();
+           
+            timeSlider.min = +startDate;
+            timeSlider.max = +endDate;
+            timeSlider.value = +currentDate;
+          }
+
+          
+        });
+
+        weatherLayers[type].layer = weatherLayer;
+        return weatherLayer;
+      }
+
+      // Update the date time display
+      function refreshTime() {
+        const weatherLayer = weatherLayers[activeLayer]?.layer;
+        if (weatherLayer) {
+        //   const d = weatherLayer.getAnimationTimeDate();
+        //   timeTextDiv.innerText = d.toString();
+        //    timeSlider.value = +d;
+        const d = weatherLayer.getAnimationTimeDate();
+        timeTextDiv.innerText = d.toString();
+           timeSlider.value = +d;
+    
+    // Formato personalizado: "Sunday 11, 13:00"
+    const options = { weekday: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const formattedDate = new Intl.DateTimeFormat('en-US', options).format(d);
+
+    timeTextDiv.innerText = formattedDate;
+        }
+      }
+
+      let legendControl; // Variable global para almacenar el control de la leyenda
+
+function changeLayerLabel(type) {
+    let labelText = "";
+    let newColorRamp = null;
+    let units = ""; // Variable para almacenar las unidades correctas
+
+    switch (type) {
+		
+		  case "precipitation":
+            labelText = "PRECIPITATION";
+            newColorRamp = maptilerweather.ColorRamp.builtin.PRECIPITATION;
+            units = "mm/h"; // Unidades de precipitación
+            break;
+		
+        case "radar":
+            labelText = "RADAR";
+            newColorRamp = maptilerweather.ColorRamp.builtin.RADAR;
+            units = "dBz"; // Unidades de precipitación
+            break;
+        case "temperature":
+            labelText = "TEMPERATURE";
+            newColorRamp = maptilerweather.ColorRamp.builtin.TEMPERATURE_3;
+            units = "°C"; // Unidades de temperatura
+            break;
+        case "pressure":
+            labelText = "PRESSURE";
+            newColorRamp = maptilerweather.ColorRamp.builtin.PRESSURE;
+            units = "hPa"; // Unidades de presión
+            break;
+        case "wind":
+            labelText = "WIND";
+            newColorRamp = maptilerweather.ColorRamp.builtin.WIND;
+            units = "m/s"; // Unidades de viento
+            break;
+        default:
+            labelText = "Weather Layer";
+            newColorRamp = null;
+            units = ""; // No hay unidades predeterminadas
+    }
+
+    // Cambiar el nombre de la capa en la UI
+    document.getElementById("variable-name").innerText = labelText;
+
+    // Remover la leyenda anterior si existe
+    if (legendControl) {
+        map.removeControl(legendControl);
+    }
+
+    // Agregar la nueva leyenda con la escala de colores correcta
+    if (newColorRamp) {
+        legendControl = new colorRampLegendControl({ colorRamp: newColorRamp, units: units });
+        map.addControl(legendControl, 'top-left');
+    }
+}
+
+
+
+      function initWeatherMap(type) {
+        const weatherLayer = changeWeatherLayer(type);
+
+       
+
+      }
+
+
+      class colorRampLegendControl {
+        constructor(options) {
+          this._options = {...options};
+          this._container = document.createElement("div");
+          this._container.classList.add("maplibregl-ctrl");
+          this._container.classList.add("maplibregl-ctrl-color-ramp");
+        }
+     
+        onAdd(map) {
+    this._map = map;
+    const colorramp = this._options.colorRamp;
+
+    // Crear un nuevo canvas con dimensiones correctas
+    const canvas = document.createElement("canvas");
+    canvas.width = 20;  // Estrecho
+    canvas.height = 100; // Alto
+
+    // Obtener el contexto 2D del canvas
+    const ctx = canvas.getContext("2d");
+
+    // Dibujar la imagen del color ramp en vertical
+    const originalCanvas = colorramp.getCanvasStrip();
+    ctx.translate(0, canvas.height); // Mover el punto de inicio
+    ctx.rotate(-Math.PI / 2); // Rotar -90° para que se vea correctamente
+    ctx.drawImage(originalCanvas, 0, 0, canvas.height, canvas.width);
+
+      // Aplicar estilos
+      canvas.style.border = "1px solid #FFFFFF"; // Borde blanco para resaltar en fondo negro
+    canvas.style.display = "block";
+
+    const bounds = colorramp.getBounds();
+
+    // Crear un contenedor para la barra de colores y las etiquetas
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.flexDirection = "column"; // Alinear en columna
+    wrapper.style.alignItems = "center";
+    wrapper.style.gap = "0px";
+    wrapper.style.background = "none"; // Fondo negro
+    wrapper.style.padding = "0px"; // Espacio alrededor
+    wrapper.style.borderRadius = "0px"; // Bordes redondeados
+    wrapper.style.boxShadow = "none";
+
+ // Crear la etiqueta máxima (arriba)
+const maxLabel = document.createElement("span");
+maxLabel.textContent = `${bounds.max} ${this._options.units}`; // Unidades dinámicas
+maxLabel.style.fontSize = "10px";
+maxLabel.style.color = "white";
+maxLabel.style.fontWeight = "bold";
+
+// Crear la etiqueta mínima (abajo)
+const minLabel = document.createElement("span");
+minLabel.textContent = `${bounds.min} ${this._options.units}`; // Unidades dinámicas
+minLabel.style.fontSize = "10px";
+minLabel.style.color = "white";
+minLabel.style.fontWeight = "bold";
+
+
+    // Agregar elementos al contenedor en orden vertical
+    wrapper.appendChild(maxLabel);
+    wrapper.appendChild(canvas);
+    wrapper.appendChild(minLabel);
+
+    this._container.appendChild(wrapper);
+    return this._container;
+}
+
+
+
+
+
+        onRemove() {
+          if (!this._map || !this._container) {
+            return;
+          }
+          this._container.parentNode.removeChild(this._container);
+          this._map = undefined;
+          delete this._map;
+        }
+      }
+
+     // map.addControl(new colorRampLegendControl({colorRamp:  maptilerweather.ColorRamp.builtin.RADAR}), 'top-left');
+
+
+      
+  </script>
+</body>
+</html>
+
+
