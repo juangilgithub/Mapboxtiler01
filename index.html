@@ -425,12 +425,12 @@
           weatherLayer.animateByFactor(0);
           windLayer.animateByFactor(0);
           playPauseButton.innerText = "Play";
-          webkit.messageHandlers.sumbitToiOS.postMessage(1);
+          webkit.messageHandlers.sumbitToiOS.postMessage("play");
         } else {
           weatherLayer.animateByFactor(1600);
           windLayer.animateByFactor(1600);
           playPauseButton.innerText = "Pause";
- 	webkit.messageHandlers.sumbitToiOS.postMessage(0);
+ 	webkit.messageHandlers.sumbitToiOS.postMessage("pause");
         }
         isPlaying = !isPlaying;
       });
