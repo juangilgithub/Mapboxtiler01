@@ -226,7 +226,7 @@
   <div id="time-info">
     <span id="time-text"></span>
   
-    <button id="play-pause-bt" class="button">Play</button>
+    <!-- <button id="play-pause-bt" class="button">Play</button> -->
     <input type="range" id="time-slider" min="0" max="11" step="1">
      
   </div>
@@ -246,9 +246,9 @@
   <ul id="buttons">
 	<li id="precipitation" class="btn btn-primary button">Precipitation</li>
     <li id="radar" class="btn btn-primary button">Radar</li>
-<!--     <li id="pressure" class="btn btn-primary button">Pressure</li>
+    <li id="pressure" class="btn btn-primary button">Pressure</li>
     <li id="temperature" class="btn btn-primary button">Temperature</li>
-    <li id="wind" class="btn btn-primary button">Wind</li> -->
+    <li id="wind" class="btn btn-primary button">Wind</li>
    </ul>
 
    <div id="play-container">
@@ -430,13 +430,13 @@
           weatherLayer.animateByFactor(0);
           windLayer.animateByFactor(0);
           playPauseButton.innerText = "Play";
-   	  webkit.messageHandlers.playPause.postMessage('pause');
+         // labelsButton.disabled = false;
         } else {
           weatherLayer.animateByFactor(1600);
           windLayer.animateByFactor(1600);
           playPauseButton.innerText = "Pause";
-          webkit.messageHandlers.playPause.postMessage('play');
-
+         // hideLabels();
+         // labelsButton.disabled = true;
         }
         isPlaying = !isPlaying;
       });
@@ -828,6 +828,7 @@ minLabel.style.fontWeight = "bold";
   </script>
 </body>
 </html>
+
 
 
 
