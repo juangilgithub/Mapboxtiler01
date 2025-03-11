@@ -359,15 +359,10 @@
 
       timeSlider.addEventListener("input", (evt) => {
         const weatherLayer = weatherLayers[activeLayer]?.layer;
-
-
-
         const timeslider =   timeSlider.value / 1000
-
         if (weatherLayer) {
           weatherLayer.setAnimationTime(parseInt(timeSlider.value / 1000));
           windLayer.setAnimationTime(parseInt(timeSlider.value / 1000));
-
         }
 
       });
@@ -430,13 +425,12 @@
           weatherLayer.animateByFactor(0);
           windLayer.animateByFactor(0);
           playPauseButton.innerText = "Play";
-         // labelsButton.disabled = false;
+          webkit.messageHandlers.sumbitToiOS.postMessage(1);
         } else {
           weatherLayer.animateByFactor(1600);
           windLayer.animateByFactor(1600);
           playPauseButton.innerText = "Pause";
-         // hideLabels();
-         // labelsButton.disabled = true;
+ 	webkit.messageHandlers.sumbitToiOS.postMessage(0);
         }
         isPlaying = !isPlaying;
       });
