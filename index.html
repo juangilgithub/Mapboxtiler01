@@ -430,13 +430,13 @@
           weatherLayer.animateByFactor(0);
           windLayer.animateByFactor(0);
           playPauseButton.innerText = "Play";
-         // labelsButton.disabled = false;
+   	  webkit.messageHandlers.playPause.postMessage('pause');
         } else {
           weatherLayer.animateByFactor(1600);
           windLayer.animateByFactor(1600);
           playPauseButton.innerText = "Pause";
-         // hideLabels();
-         // labelsButton.disabled = true;
+          webkit.messageHandlers.playPause.postMessage('play');
+
         }
         isPlaying = !isPlaying;
       });
